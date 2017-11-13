@@ -22,7 +22,7 @@ app.use('/api',booking);
 app.use('/api',driversLocation);
 app.use('/api',drivers);
 
-io.listen(app.listen(8080,()=>{
+io.listen(app.listen((process.env.PORT || 8080),()=>{
 	console.log("server running on port 8080");
 }),{pingTimeout: 30000});
 
