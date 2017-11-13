@@ -1,9 +1,12 @@
 var express = require('express');
+
 var path = require('path');	
 var bodyParser=require('body-parser');
 
 var app=express();
-var io=require('socket.io')();
+var server= require('http').Server(app);
+
+var io=require('socket.io')(server);
 
 var booking=require('./route/booking');
 var driversLocation=require('./route/driversLocation');
@@ -22,7 +25,7 @@ app.use('/api',booking);
 app.use('/api',driversLocation);
 app.use('/api',drivers);
 
-io.listen(app.listen((process.env.PORT || 8080),()=>{
+server.listen((process.env.PORT || 8080),()=>{
 	console.log("server running on port 8080");
 }),{pingTimeout: 30000});
 
