@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Taxi App</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+</head>
+<body>
+<div class="container-fluid">
+	<h1>Welcome to driver's Application</h1>
+	<br/>
+	<div class="row">
+		<form class="col-md-6">
+			<div class="form-group">
+			    <select class="form-control" id="bookingStatus">
+			      <option value="confirmed">Confirmed</option>
+			    </select>
+ 			</div>
+ 			<input type="button" name="Submit" value="Confirm Booking" class="btn btn-danger col-md-6">
+		</form>
+	</div>
+</div>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+<script >
+	var socket=io();
+	socket.on('connect',()=>{
+
+		console.log(socket.id);
+		const driverCurrentInfo={
+			"socketID":socket.id,
+			"locationID":"59f23a5a734d1d0e5abfc4d1"
+		}
+		$.ajax({
+			url:'/api/driversLocationSocket/'+driverCurrentInfo.locationID,
+			method:"POST",
+			dataType:"JSON",
+			data:driverCurrentInfo
+		}).done((res)=>{
+			console.log(res);
+		});
+
+		var driverRequest=socket.id;
+
+		socket.on(driverRequest,(data)=>{
+			if(data){
+			console.log("New Booking");
+			console.log(data);
+			var status=$('#bookingStatus').val();
+
+			var datatoSend={
+				"driverID":"59f237ca734d1d0e5abfc346",
+				"id":data._id,
+				"status":status
+			};
+
+			$('.btn').click(function(e){
+				$.ajax({
+					url:'/api/booking/'+data._id,
+					method:'PUT',
+					dataType:'JSON',
+					data:datatoSend
+				}).done((res)=>{
+					console.log(res);
+				})
+			});
+
+		}
+
+		});
+		socket.on('Track',(location)=>{
+			var staticLocation=[{
+				lat:12.968997,
+				long:77.720885
+			},
+			{
+				lat:12.956570,
+				long:77.705363,
+			},
+			{
+				lat:12.939414,
+				long:77.695203,
+			},
+			{
+				lat:12.920039,
+				long:77.666865
+			},
+			{
+				lat:12.917858,
+				long:77.624524
+			},
+			{
+				lat:12.916576,
+				long:77.610116
+			}];
+
+			var index=0;
+			var interval=setInterval(()=>{
+				var locationObject=staticLocation[index++];
+				if(index==staticLocation.length)
+					clearInterval(interval);
+
+				var currentLocation={
+					"_id":location._id,
+					"socketID":socket.id,
+					"latitude":locationObject.lat,
+					"longitude":locationObject.long
+				};
+
+				$.ajax({
+					url:'/api/driverLocation/'+location._id,
+					method:'PUT',
+					dataType:'JSON',
+					data:currentLocation
+				}).done((res)=>{
+					console.log("driverLocation Updated")
+				});
+
+			},5000);
+
+
+		});
+
+	})
+</script>
+</body>
+</html>
