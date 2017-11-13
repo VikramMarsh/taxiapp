@@ -27,7 +27,7 @@ app.use('/api',drivers);
 
 server.listen((process.env.PORT || 8080),()=>{
 	console.log("server running on port 8080");
-}),{pingTimeout: 30000});
+});
 
 app.io=io.on('connection',(socket)=>{
 	console.log("socket connected "+socket.id);
